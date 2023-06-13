@@ -83,7 +83,7 @@ if uploaded_files:
                     start_date = st.date_input('Select a start date', value=all2['Date'].min())
             with col2:
                     end_date = st.date_input('Select an end date', value=all2['Date'].max())
-                filtered_df = filtered_df[(all2['Date'] >= pd.Timestamp(start_date)) & (all2['Date'] <= pd.Timestamp(end_date))]
+            all2 = all2[(all2['Date'] >= pd.Timestamp(start_date)) & (all2['Date'] <= pd.Timestamp(end_date))]
             col1 , col2 = st.columns([1,3])
             with col1 :
                     list1 = ['complimentary_sum', 'amenities_sum', 'linen_sum']
