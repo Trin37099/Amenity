@@ -43,7 +43,7 @@ if uploaded_files:
             def perform(all) :
                 all = all.fillna(0)
                 all['time_stamp'] = pd.to_datetime(all['time_stamp'])
-                all[['created_at','updated_at']] = all[['created_at','updated_at']].astype('datetime64')                
+                all[['created_at','updated_at']] = all[['created_at','updated_at']].apply(pd.to_datetime)               
                 all['time_of_day'] = pd.NA
                 all.loc[all['time_stamp'].dt.hour >= 12, 'time_of_day'] = 'Afternoon'
                 all.loc[all['time_stamp'].dt.hour < 12, 'time_of_day'] = 'Morning'
