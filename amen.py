@@ -420,9 +420,9 @@ if uploaded_files:
     with resoures:
         resoures_df = perform1(all1)
         col1, col2 = st.columns(2)
-            with col1:
+        with col1:
                 start_date = st.date_input('Select a start date', value=pd.to_datetime(resoures_df['started_at'].min()).date())
-            with col2:
+        with col2:
                 end_date = st.date_input('Select an end date', value=pd.to_datetime(resoures_df['started_at'].max()).date())
 
         start_timestamp = pd.Timestamp(start_date, tz='UTC')
