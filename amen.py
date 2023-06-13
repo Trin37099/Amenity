@@ -424,7 +424,9 @@ if uploaded_files:
                     start_date = st.date_input('Select a start date  ', value=resoures_df['started_at'].min())
         with col2:
                     end_date = st.date_input('Select an end date   ', value=resoures_df['started_at'].max())
-        resoures_df = resoures_df[(resoures_df['started_at'] >= pd.Timestamp(start_date)) & (resoures_df['started_at'] <= pd.Timestamp(end_date))]
+        start_timestamp = pd.Timestamp(start_date, tz='UTC')
+        end_timestamp = pd.Timestamp(end_date, tz='UTC')
+        resoures_df = resoures_df[(resoures_df['started_at'] >= start_timestamp) & (resoures_df['started_at'] <= end_timestamp)]
         resoures_df = resoures_df[resoures_df["cleaning_type"] != "DND"]
         www,mmm,yyy = st.tabs(['**weekly**','**monthly**','**yearly**'])
         with mmm:
