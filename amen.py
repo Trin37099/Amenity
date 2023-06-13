@@ -20,7 +20,7 @@ st.set_page_config(
     layout = 'wide',
 )
 st.markdown('# AtMind Group')
-st.title('Amenity')
+st.title('Alto')
 
 
 uploaded_files = st.file_uploader("Choose a excel file", type='xlsx', accept_multiple_files=True)
@@ -419,6 +419,16 @@ if uploaded_files:
             st.plotly_chart(fig, use_container_width=True)
     with resoures:
         resoures_df = perform1(all1)
+        col1, col2 = st.columns(2)
+            with col1:
+                start_date = st.date_input('Select a start date', value=pd.to_datetime(resoures_df['started_at'].min()).date())
+            with col2:
+                end_date = st.date_input('Select an end date', value=pd.to_datetime(resoures_df['started_at'].max()).date())
+
+        start_timestamp = pd.Timestamp(start_date, tz='UTC')
+        end_timestamp = pd.Timestamp(end_date, tz='UTC')
+
+        resoures_df = resoures_df[(resoures_df['started_at'] >= start_timestamp) & (resoures_df['started_at'] <= end_timestamp)]
         resoures_df = resoures_df[resoures_df["cleaning_type"] != "DND"]
         www,mmm,yyy = st.tabs(['**weekly**','**monthly**','**yearly**'])
         with mmm:
