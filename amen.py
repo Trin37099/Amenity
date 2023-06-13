@@ -80,13 +80,10 @@ if uploaded_files:
             month_order = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
             col1,col2 = st.columns(2)
             with col1:
-                        start_date = st.date_input('Select a start date', value=all2['Date'].min())
+                    start_date = st.date_input('Select a start date', value=all2['Date'].min())
             with col2:
-                        end_date = st.date_input('Select an end date', value=all2['Date'].max())
-            start_timestamp = pd.Timestamp(start_date, tz='UTC')
-            end_timestamp = pd.Timestamp(end_date, tz='UTC')
-
-            all2 = all2[(all2['Date'] >= start_timestamp) & (all2['Date'] <= end_timestamp)]
+                    end_date = st.date_input('Select an end date', value=all2['Date'].max())
+                filtered_df = filtered_df[(all2['Date'] >= pd.Timestamp(start_date)) & (all2['Date'] <= pd.Timestamp(end_date))]
             col1 , col2 = st.columns([1,3])
             with col1 :
                     list1 = ['complimentary_sum', 'amenities_sum', 'linen_sum']
