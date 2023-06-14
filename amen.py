@@ -14,7 +14,7 @@ import seaborn as sns
 import warnings
 import calendar
 warnings.filterwarnings('ignore')
-st.cache(suppress_st_warning=True)
+st.cache(allow_output_mutation=True)
 st.set_page_config(
     page_title="Amenity",
     layout = 'wide',
