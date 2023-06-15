@@ -16,7 +16,7 @@ import calendar
 warnings.filterwarnings('ignore')
 st.cache(allow_output_mutation=True)
 st.set_page_config(
-    page_title="Amenity",
+    page_title="Alto",
     layout = 'wide',
 )
 st.markdown('# AtMind Group')
