@@ -14,9 +14,9 @@ import seaborn as sns
 import warnings
 import calendar
 warnings.filterwarnings('ignore')
-st.cache(allow_output_mutation=True)
+
 st.set_page_config(
-    page_title="Alto",
+    page_title="Alto_maid",
     layout = 'wide',
 )
 st.markdown('# AtMind Group')
@@ -70,13 +70,13 @@ if uploaded_files:
 
             all2 =  perform(all)
 
-                #lis_t =['complimentary_กาแฟ', 'complimentary_น้ำตาล', 'complimentary_ครีมเทียม',
-                #     'complimentary_ชา', 'amenities_แชมพู', 'amenities_สบู่ล้างมือ', 'amenities_ครีมอาบน้ำ',
-                #     'amenities_ชุดแปรงฟัน', 'amenities_หมวกคลุมผม', 'amenities_คัทเติ้ลบัช', 'amenities_น้ำดื่ม',
-                #     'amenities_กระดาษรองแก้ว', 'amenities_ถุงคลุมแก้ว', 'amenities_ดินสอ', 'amenities_สมุดดาษโน๊ต',
-                #     'amenities_ทิชชูเช็ดหน้า', 'amenities_ทิชชูม้วน', 'amenities_ถุงขยะดำ_18x20', 'linen_ผ้าปูเตียง',
-                #     'linen_ปลอกผ้าดูเว้', 'linen_ปลอกหมอน', 'linen_ผ้าเช็ดตัว', 'linen_ผ้าเช็ดมือ',
-                #     'linen_ผ้าเช็ดเท้า', 'linen_เสื้อคลุมอาบน้ำ']
+            #lis_t =['complimentary_กาแฟ', 'complimentary_น้ำตาล', 'complimentary_ครีมเทียม',
+            #     'complimentary_ชา', 'amenities_แชมพู', 'amenities_สบู่ล้างมือ', 'amenities_ครีมอาบน้ำ',
+            #     'amenities_ชุดแปรงฟัน', 'amenities_หมวกคลุมผม', 'amenities_คัทเติ้ลบัช', 'amenities_น้ำดื่ม',
+            #     'amenities_กระดาษรองแก้ว', 'amenities_ถุงคลุมแก้ว', 'amenities_ดินสอ', 'amenities_สมุดดาษโน๊ต',
+            #     'amenities_ทิชชูเช็ดหน้า', 'amenities_ทิชชูม้วน', 'amenities_ถุงขยะดำ_18x20', 'linen_ผ้าปูเตียง',
+            #     'linen_ปลอกผ้าดูเว้', 'linen_ปลอกหมอน', 'linen_ผ้าเช็ดตัว', 'linen_ผ้าเช็ดมือ',
+            #     'linen_ผ้าเช็ดเท้า', 'linen_เสื้อคลุมอาบน้ำ']
             month_order = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
             col1,col2 = st.columns(2)
             with col1:
@@ -291,10 +291,9 @@ if uploaded_files:
                 all1 = all1[['id','worktype','workdes','cleaning_type','status','report_urgent','assigned_by','role_assigned_by','assigned_to','role_assigned_to','created_by','role_created_by','timetaken','started_at','pause_at','continue_at','cleaning_finished_at','end_at','report_type_id']]
                 all1= all1[all1['timetaken'] > 0]
                 all1[['id','report_type_id']] = all1[['id','report_type_id']].astype(str)
-                #df1['percentile'] = df1['timetaken'].rank(pct=True)
                 return all1
+
             all3 =  perform1(all1)
-            st.write(all3)
             col1, col2 = st.columns(2)
             with col1:
                 start_date = st.date_input('Select a start date', value=pd.to_datetime(all3['started_at'].min()).date())
@@ -305,37 +304,78 @@ if uploaded_files:
             end_timestamp = pd.Timestamp(end_date, tz='UTC')
 
             all3 = all3[(all3['started_at'] >= start_timestamp) & (all3['started_at'] <= end_timestamp)]
+            st.write(all3)
 
             total_t,co,od,vc = st.tabs(['**All type**','**C/O**','**OD**','**VC**'])
-            with total_t:     
-                all3['percentile'] = all3['timetaken'].rank(pct=True)
-                fig = px.box(all3, x="timetaken", points="all", hover_data=all3.columns)
+            with total_t:
+                all3_c =all3.copy()
+                all3_c['percentile'] = all3_c['timetaken'].rank(pct=True)
+                min_val, max_val = float(all3_c['percentile'].min()), float(all3_c['percentile'].max())
+                tk_min, tk_max = st.slider('Select a range of Q', min_val, max_val, (min_val, max_val))
+                all3_c = all3_c[(all3_c['percentile'] >= tk_min) & (all3_c['percentile'] <= tk_max)]
+                fig = px.box(all3_c, x="timetaken", points="all", hover_data=all3_c.columns)
                 fig.update_layout(xaxis_title="Cleaning Type", yaxis_title="Time Taken")
                 st.plotly_chart(fig, use_container_width=True)
-                c1,c2,c3 = st.columns([1,1.5,1])
-                c2.write((all3[['timetaken']].describe().T),use_container_width=True)
+                c1, c2, c3 = st.columns([1, 1.5, 1])
+                c2.write(all3_c[['timetaken']].describe().T, use_container_width=True)
             with co:
-                co_df = all3[all3["cleaning_type"] == "C/O"]
+                co_df = all3.copy()
+                co_df = co_df[co_df["cleaning_type"] == "C/O"]
                 co_df['percentile'] = co_df['timetaken'].rank(pct=True)
+                min_val, max_val = float(co_df['percentile'].min()), float(co_df['percentile'].max())
+                tk_min, tk_max = st.slider('Select a range of Q', min_val, max_val, (min_val, max_val))
+                co_df = co_df[(co_df['percentile'] >= tk_min) & (co_df['percentile'] <= tk_max)]
                 fig = px.box(co_df, x="timetaken", points="all", hover_data=co_df.columns)
                 fig.update_layout(xaxis_title="Cleaning Type", yaxis_title="Time Taken")
                 st.plotly_chart(fig, use_container_width=True)
+                grouped = co_df.groupby(co_df['started_at'].dt.date).size().reset_index(name='count')
+                fig = px.bar(grouped, x='started_at', y='count', text_auto=True)
+                grouped1 = co_df.groupby(co_df['assigned_to']).size().reset_index(name='count')
+                grouped1 = grouped1.sort_values('count', ascending=False)
+                fig1 = px.bar(grouped1, x='assigned_to', y='count',color='assigned_to')
+                col1,col2 = st.columns(2)
+                col1.plotly_chart(fig1, use_container_width=True)
+                col2.plotly_chart(fig, use_container_width=True)
                 c11,c22,c33 = st.columns([1,1.5,1])
                 c22.write((co_df[['timetaken']].describe().T),use_container_width=True)
             with od:
-                od_df = all3[all3["cleaning_type"] == "OD"]
+                od_df = all3.copy()
+                od_df = od_df[od_df["cleaning_type"] == "OD"]
                 od_df['percentile'] = od_df['timetaken'].rank(pct=True)
+                min_val, max_val = float(od_df['percentile'].min()), float(od_df['percentile'].max())
+                tk_min, tk_max = st.slider('Select a range of Q', min_val, max_val, (min_val, max_val))
+                od_df = od_df[(od_df['percentile'] >= tk_min) & (od_df['percentile'] <= tk_max)]
                 fig = px.box(od_df, x="timetaken", points="all", hover_data=od_df.columns)
                 fig.update_layout(xaxis_title="Cleaning Type", yaxis_title="Time Taken")
                 st.plotly_chart(fig, use_container_width=True)
+                grouped = od_df.groupby(od_df['started_at'].dt.date).size().reset_index(name='count')
+                fig = px.bar(grouped, x='started_at', y='count', text_auto=True)
+                grouped1 = od_df.groupby(od_df['assigned_to']).size().reset_index(name='count')
+                grouped1 = grouped1.sort_values('count', ascending=False)
+                fig1 = px.bar(grouped1, x='assigned_to', y='count',color='assigned_to')
+                col1,col2 = st.columns(2)
+                col1.plotly_chart(fig1, use_container_width=True)
+                col2.plotly_chart(fig, use_container_width=True)
                 c11,c22,c33 = st.columns([1,1.5,1])
                 c22.write((od_df[['timetaken']].describe().T),use_container_width=True)
             with vc:
-                vc_df = all3[all3["cleaning_type"] == "VC"]
+                vc_df = all3.copy()
+                vc_df = vc_df[vc_df["cleaning_type"] == "VC"]
                 vc_df['percentile'] = vc_df['timetaken'].rank(pct=True)
+                min_val, max_val = float(vc_df['percentile'].min()), float(vc_df['percentile'].max())
+                tk_min, tk_max = st.slider('Select a range of Q', min_val, max_val, (min_val, max_val))
+                vc_df = vc_df[(vc_df['percentile'] >= tk_min) & (vc_df['percentile'] <= tk_max)]
                 fig = px.box(vc_df, x="timetaken", points="all", hover_data=vc_df.columns)
                 fig.update_layout(xaxis_title="Cleaning Type", yaxis_title="Time Taken")
                 st.plotly_chart(fig, use_container_width=True)
+                grouped = vc_df.groupby(vc_df['started_at'].dt.date).size().reset_index(name='count')
+                fig = px.bar(grouped, x='started_at', y='count', text_auto=True)
+                grouped1 = vc_df.groupby(vc_df['assigned_to']).size().reset_index(name='count')
+                grouped1 = grouped1.sort_values('count', ascending=False)
+                fig1 = px.bar(grouped1, x='assigned_to', y='count',color='assigned_to')
+                col1,col2 = st.columns(2)
+                col1.plotly_chart(fig1, use_container_width=True)
+                col2.plotly_chart(fig, use_container_width=True)
                 c111,c222,c333 = st.columns([1,1.5,1])
                 c222.write((vc_df[['timetaken']].describe().T),use_container_width=True)
 
@@ -346,20 +386,20 @@ if uploaded_files:
                     grouped1 = co_df.groupby(co_df['started_at'].dt.day_name().astype(pd.CategoricalDtype(ordered_day_names)))['timetaken'].mean().reset_index(name='mean')
                     fig = px.bar(grouped1, x='started_at', y='mean', text_auto=True)
                     fig.update_layout(title="C/O")
-                    max = grouped1['mean'].max()
-                    fig.update_yaxes(range=[0, max+1])
+                    #max = grouped1['mean'].max()
+                    #fig.update_yaxes(range=[0, max+1])
                     st.plotly_chart(fig, use_container_width=True)
                 with cl1 :
                     grouped = od_df.groupby(od_df['started_at'].dt.day_name().astype(pd.CategoricalDtype(ordered_day_names)))['timetaken'].mean().reset_index(name='mean')
                     fig = px.bar(grouped, x='started_at', y='mean', text_auto=True)
                     fig.update_layout(title="OD")
-                    fig.update_yaxes(range=[0, max+1])
+                    #fig.update_yaxes(range=[0, max+1])
                     st.plotly_chart(fig, use_container_width=True)
                 with cl2:
                     grouped = vc_df.groupby(vc_df['started_at'].dt.day_name().astype(pd.CategoricalDtype(ordered_day_names)))['timetaken'].mean().reset_index(name='mean')
                     fig = px.bar(grouped, x='started_at', y='mean', text_auto=True)
                     fig.update_layout(title="VC")
-                    fig.update_yaxes(range=[0, max+1])
+                    #fig.update_yaxes(range=[0, max+1])
                     st.plotly_chart(fig, use_container_width=True)
             with my:
                 cl,cl1,cl2 = st.columns(3)
@@ -367,22 +407,22 @@ if uploaded_files:
                     grouped11 = co_df.groupby(co_df['started_at'].dt.date)['timetaken'].mean().reset_index(name='mean')
                     fig = px.bar(grouped11, x='started_at', y='mean', text_auto=True)
                     fig.update_layout(title="C/O")
-                    max = grouped11['mean'].max()
-                    fig.update_yaxes(range=[0, max+1])
+                    #max = grouped11['mean'].max()
+                    #fig.update_yaxes(range=[0, max+1])
                     st.plotly_chart(fig, use_container_width=True)
 
                 with cl1 :
                     grouped = od_df.groupby(od_df['started_at'].dt.date)['timetaken'].mean().reset_index(name='mean')
                     fig = px.bar(grouped, x='started_at', y='mean', text_auto=True)
                     fig.update_layout(title="OD")
-                    fig.update_yaxes(range=[0, max+1])
+                    #fig.update_yaxes(range=[0, max+1])
                     st.plotly_chart(fig, use_container_width=True)
 
                 with cl2:
                     grouped = vc_df.groupby(vc_df['started_at'].dt.date)['timetaken'].mean().reset_index(name='mean')
                     fig = px.bar(grouped, x='started_at', y='mean', text_auto=True)
                     fig.update_layout(title="VC")
-                    fig.update_yaxes(range=[0, max+1])
+                    #fig.update_yaxes(range=[0, max+1])
                     st.plotly_chart(fig, use_container_width=True)
             with yy:
                 cl,cl1,cl2 = st.columns(3)
@@ -390,22 +430,22 @@ if uploaded_files:
                     grouped111 = co_df.groupby(co_df['started_at'].dt.month_name().astype(pd.CategoricalDtype(month_order)))['timetaken'].mean().reset_index(name='mean')
                     fig = px.bar(grouped111, x='started_at', y='mean', text_auto=True)
                     fig.update_layout(title="C/O")
-                    max = grouped111['mean'].max()
-                    fig.update_yaxes(range=[0, max+1])
+                    #max = grouped111['mean'].max()
+                    #fig.update_yaxes(range=[0, max+1])
                     st.plotly_chart(fig, use_container_width=True)
 
                 with cl1 :
                     grouped = od_df.groupby(od_df['started_at'].dt.month_name().astype(pd.CategoricalDtype(month_order)))['timetaken'].mean().reset_index(name='mean')
                     fig = px.bar(grouped, x='started_at', y='mean', text_auto=True)
                     fig.update_layout(title="OD")
-                    fig.update_yaxes(range=[0, max+1])
+                    #fig.update_yaxes(range=[0, max+1])
                     st.plotly_chart(fig, use_container_width=True)
 
                 with cl2:
                     grouped = vc_df.groupby(vc_df['started_at'].dt.month_name().astype(pd.CategoricalDtype(month_order)))['timetaken'].mean().reset_index(name='mean')
                     fig = px.bar(grouped, x='started_at', y='mean', text_auto=True)
                     fig.update_layout(title="VC")
-                    fig.update_yaxes(range=[0, max+1])
+                    #fig.update_yaxes(range=[0, max+1])
                     st.plotly_chart(fig, use_container_width=True)
             worktype_cl = perform1(all1)
             worktype_cl = worktype_cl[worktype_cl["worktype"] == "Cleaning"]
@@ -446,9 +486,9 @@ if uploaded_files:
             st.plotly_chart(fig, use_container_width=True)
         ccc1,ccc2 = st.columns(2)
         with ccc1:
-            grouped = resoures_df.groupby(resoures_df['assigned_to'])['timetaken'].sum().reset_index(name='sum timetaken')
-            grouped = grouped.sort_values('sum timetaken', ascending=False)
-            fig = px.bar(grouped, x='assigned_to', y='sum timetaken',color='assigned_to')
+            grouped = resoures_df.groupby(resoures_df['assigned_to'])['timetaken'].sum().reset_index(name='sum timetaken(min)')
+            grouped = grouped.sort_values('sum timetaken(min)', ascending=False)
+            fig = px.bar(grouped, x='assigned_to', y='sum timetaken(min)',color='assigned_to')
             st.plotly_chart(fig, use_container_width=True)
         with ccc2:
             grouped = pd.crosstab(resoures_df['assigned_to'], resoures_df['cleaning_type'])
